@@ -320,10 +320,26 @@ APT::Periodic::Unattended-Upgrade "1";'
 # 8. DISABLE UNUSED SERVICES
 # Each of these services increases attack surface without providing value
 # on a single-user desktop with no printer, mobile modem, or local discovery needs.
+# Bluetooth is optional — you will be prompted.
 # ─────────────────────────────────────────────
 echo "[8] Unused services"
+
+# Bluetooth: prompt the user since they may use BT peripherals
+BT_STATUS=$(systemctl is-active bluetooth 2>/dev/null || echo "inactive")
+BT_ENABLED=$(systemctl is-enabled bluetooth 2>/dev/null || echo "disabled")
+echo "  [bluetooth] currently: $BT_STATUS / $BT_ENABLED"
+if $APPLY; then
+    read -r -p "  Disable bluetooth? [y/N] " bt_answer
+    if [[ "${bt_answer,,}" == "y" ]]; then
+        check_service bluetooth
+    else
+        echo "  [bluetooth] kept enabled — skipping"
+    fi
+else
+    echo "  [bluetooth] optional — you will be asked when running --apply"
+fi
+
 SERVICES=(
-    bluetooth                # no Bluetooth devices in use
     avahi-daemon             # mDNS/Bonjour — not needed on single-user desktop
     cups                     # printing — remove from list if you have a printer
     cups-browsed             # network printer discovery via mDNS
