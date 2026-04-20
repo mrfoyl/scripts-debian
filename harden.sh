@@ -39,6 +39,7 @@ write_file() {
 
     if $APPLY; then
         echo "$content" > "$path"
+        echo "  [+] Written: $path"
     else
         if [[ -f "$path" ]]; then
             echo "    would update: $path"
@@ -62,6 +63,7 @@ append_if_missing() {
     else
         if $APPLY; then
             echo "$line" >> "$file"
+            echo "  [+] Appended to $file: $line"
         else
             echo "    would append to $file: $line"
         fi
@@ -375,11 +377,12 @@ if grep -q '/dev/shm' /etc/fstab; then
     fi
 else
     echo "    no /dev/shm entry in /etc/fstab"
-    echo "    would add: $FSTAB_LINE"
     if $APPLY; then
         echo "$FSTAB_LINE" >> /etc/fstab
         mount -o remount /dev/shm 2>/dev/null || echo "  [!] Remount failed — will apply on next boot"
         echo "  [+] /dev/shm secured"
+    else
+        echo "    would add: $FSTAB_LINE"
     fi
 fi
 
@@ -401,10 +404,11 @@ done
 echo "[11] Restrict su"
 PAM_SU=/etc/pam.d/su
 if grep -q '#.*pam_wheel' "$PAM_SU"; then
-    echo "    pam_wheel is commented out — would enable it in $PAM_SU"
     if $APPLY; then
         sed -i 's/^#\(.*pam_wheel.*\)/\1/' "$PAM_SU"
         echo "  [+] su restricted to sudo group"
+    else
+        echo "    pam_wheel is commented out — would enable it in $PAM_SU"
     fi
 else
     echo "    pam_wheel already configured or not present — no change"
