@@ -32,6 +32,15 @@ sudo bash harden.sh
 
 Log is written to `/var/log/harden.log`. Reboot after running to apply all kernel settings.
 
+### What it doesn't cover
+
+Some hardening measures can't be applied to a running system and must be decided at install time or require significant manual effort:
+
+- **Partition scheme** — separate `/tmp`, `/var/tmp`, `/home`, `/var` mounts with `noexec`/`nosuid`/`nodev` flags must be set up during OS installation. `/dev/shm` is the exception and is handled by this script (section 9).
+- **GRUB/boot password** — prevents tampering with boot parameters from the console; requires manual setup.
+- **Intrusion detection** — file integrity monitoring (AIDE, rkhunter) requires baseline snapshots and scheduled checks; too site-specific to automate here.
+- **Audit logging** — `auditd` with custom rules is workload-dependent and not included.
+
 ### Known caveats
 
 **QEMU/KVM virtual machines**
